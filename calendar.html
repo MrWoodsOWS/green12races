@@ -6,27 +6,24 @@
     <title>Runners Connect - Race Calendar</title>
     <style>
         /* =========================================================
-           COLOR CONFIGURATION (Lines 10 - 33)
-           Change these hex values to customize your website colors!
+           COLOR CONFIGURATION
            ========================================================= */
         :root {
-            /* LIGHT MODE COLORS */
-            --primary: #FF5A5F;        /* Main Accent (Buttons, Badges) */
-            --primary-hover: #E0484D;  /* Button Hover State */
-            --background: #F7F9FC;     /* Main Page Background */
-            --card-bg: #FFFFFF;        /* Cards & Calendar Grid Background */
-            --text-main: #333333;      /* Main Bold Text */
-            --text-light: #777777;     /* Sub-text and Captions */
-            --border: #E1E4E8;         /* Card Borders & Lines */
+            --primary: #FF5A5F;        
+            --primary-hover: #E0484D;  
+            --background: #F7F9FC;     
+            --card-bg: #FFFFFF;        
+            --text-main: #333333;      
+            --text-light: #777777;     
+            --border: #E1E4E8;         
         }
 
         body.dark-mode {
-            /* DARK MODE COLORS */
-            --background: #121212;     /* Dark Page Background */
-            --card-bg: #1E1E1E;        /* Dark Cards & Calendar Grid Background */
-            --text-main: #F0F0F0;      /* Light Text for Dark Background */
-            --text-light: #A0A0A0;     /* Muted Text for Dark Background */
-            --border: #2D3139;         /* Dark Mode Borders */
+            --background: #121212;     
+            --card-bg: #1E1E1E;        
+            --text-main: #F0F0F0;      
+            --text-light: #A0A0A0;     
+            --border: #2D3139;         
         }
         /* ========================================================= */
 
@@ -52,7 +49,6 @@
             margin-bottom: 20px;
         }
 
-        /* Controls Layout (Tabs + Theme Switcher) */
         .controls-row {
             display: flex;
             justify-content: space-between;
@@ -102,10 +98,9 @@
             background-color: var(--border);
         }
 
-        /* Form Styling */
         .add-race-card {
             background: var(--card-bg);
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             margin-bottom: 30px;
@@ -119,25 +114,38 @@
 
         .add-race-card h2 {
             margin-top: 0;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
         }
 
-        .form-group {
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-field {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-field label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
         }
 
         input {
-            flex: 1;
-            min-width: 150px;
             padding: 10px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 1rem;
             background-color: var(--card-bg);
             color: var(--text-main);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .form-buttons {
@@ -170,7 +178,7 @@
             display: none !important;
         }
 
-        /* List View Styling */
+        /* List View */
         .race-list {
             display: flex;
             flex-direction: column;
@@ -206,19 +214,34 @@
             font-weight: bold;
             text-align: right;
             font-size: 0.95rem;
+            min-width: 140px;
         }
 
         .race-details {
             color: var(--text-light);
             font-size: 0.95rem;
-            margin-top: 4px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .race-details a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .race-details a:hover {
+            text-decoration: underline;
         }
 
         .action-links {
-            margin-top: 6px;
+            margin-top: 8px;
             font-size: 0.8rem;
             font-weight: normal;
             color: var(--text-light);
+            line-height: 1.4;
         }
 
         .action-links span {
@@ -229,15 +252,17 @@
             text-decoration: underline;
         }
 
-        .edit-action {
-            color: #0066cc;
-        }
+        .edit-action { color: #0066cc; }
         body.dark-mode .edit-action { color: #4da6ff; }
 
-        .delete-action {
-            color: #cc0000;
-        }
+        .delete-action { color: #cc0000; }
         body.dark-mode .delete-action { color: #ff4d4d; }
+
+        .export-action {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        body.dark-mode .export-action { color: #81c784; }
 
         .participants-section {
             background-color: var(--background);
@@ -269,7 +294,7 @@
             gap: 10px;
         }
 
-        /* Calendar View Styling */
+        /* Calendar View */
         .calendar-container {
             background: var(--card-bg);
             border-radius: 12px;
@@ -370,13 +395,31 @@
         <div class="add-race-card" id="formCard">
             <h2 id="formTitle">Post a New Race</h2>
             <form id="raceForm">
-                <div class="form-group">
-                    <input type="text" id="raceName" placeholder="Race Name (e.g., Boston Marathon)" required>
-                    <input type="date" id="raceDate" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" id="raceLocation" placeholder="Location" required>
-                    <input type="text" id="addedBy" placeholder="Your Name" required>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="raceName">Race Name</label>
+                        <input type="text" id="raceName" placeholder="e.g., Boston Marathon" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="raceDate">Race Date</label>
+                        <input type="date" id="raceDate" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="raceLocation">Location</label>
+                        <input type="text" id="raceLocation" placeholder="e.g., Boston, MA" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="addedBy">Your Name</label>
+                        <input type="text" id="addedBy" placeholder="e.g., Sarah" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="appCloseDate">Applications Close (Optional)</label>
+                        <input type="date" id="appCloseDate">
+                    </div>
+                    <div class="form-field">
+                        <label for="raceLink">Race Website (Optional)</label>
+                        <input type="url" id="raceLink" placeholder="https://example.com">
+                    </div>
                 </div>
                 <div class="form-buttons">
                     <button type="submit" id="submitBtn">Add Race to Calendar</button>
@@ -385,30 +428,23 @@
             </form>
         </div>
 
-        <div id="listViewContainer" class="race-list">
-            </div>
+        <div id="listViewContainer" class="race-list"></div>
 
         <div id="calendarViewContainer" class="calendar-container hidden">
             <div class="calendar-navbar">
                 <button class="nav-btn" onclick="changeMonth(-1)">◀ Prev</button>
-                <h2 id="calendarMonthYear">Month Year</h2>
+                <h2 id="calendarMonthYear"></h2>
                 <button class="nav-btn" onclick="changeMonth(1)">Next ▶</button>
             </div>
-            <div class="calendar-grid" id="calendarGrid">
-                </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
         </div>
-
     </div>
 
     <script>
-        
-
-        // State Management
         let races = JSON.parse(localStorage.getItem('runnerRaces')) || [];
         let currentCalendarDate = new Date(); 
         let editingRaceId = null;
 
-        // DOM elements
         const raceForm = document.getElementById('raceForm');
         const formCard = document.getElementById('formCard');
         const formTitle = document.getElementById('formTitle');
@@ -419,10 +455,8 @@
         const calendarGrid = document.getElementById('calendarGrid');
         const calendarMonthYear = document.getElementById('calendarMonthYear');
 
-        // --- THEME MANAGEMENT ---
         function initTheme() {
-            const isDark = localStorage.getItem('runnerDarkMode') === 'true';
-            if (isDark) {
+            if (localStorage.getItem('runnerDarkMode') === 'true') {
                 document.body.classList.add('dark-mode');
                 document.getElementById('themeIcon').innerText = '☀️';
                 document.getElementById('themeText').innerText = 'Light Mode';
@@ -432,16 +466,13 @@
         function toggleTheme() {
             const isDark = document.body.classList.toggle('dark-mode');
             localStorage.setItem('runnerDarkMode', isDark);
-            
             document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
             document.getElementById('themeText').innerText = isDark ? 'Light Mode' : 'Dark Mode';
         }
 
-        // Toggle between List and Calendar layouts
         function switchView(view) {
             document.getElementById('btnListView').classList.remove('active');
             document.getElementById('btnCalendarView').classList.remove('active');
-            
             if (view === 'list') {
                 document.getElementById('btnListView').classList.add('active');
                 listViewContainer.classList.remove('hidden');
@@ -454,10 +485,56 @@
             }
         }
 
-        // --- RENDER LIST VIEW ---
+        function formatDateFriendly(dateStr) {
+            if (!dateStr) return '';
+            return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        // --- NEW FEATURE: NATIVE PHONE CALENDAR EXPORTER (.ics) ---
+        function exportToPhoneCalendar(raceId) {
+            const race = races.find(r => r.id === raceId);
+            if (!race) return;
+
+            // Format race date from YYYY-MM-DD to YYYYMMDD
+            const cleanStartDate = race.date.replace(/-/g, '');
+            
+            // Calculate end date (next day) for an all-day event structure
+            const endDateObj = new Date(race.date);
+            endDateObj.setDate(endDateObj.getDate() + 1);
+            const cleanEndDate = endDateObj.toISOString().slice(0,10).replace(/-/g, '');
+
+            // Construct iCalendar text format block
+            const icsLines = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Runners Connect//Race Calendar//EN',
+                'BEGIN:VEVENT',
+                `UID:${race.id}@runnersconnect`,
+                `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+                `DTSTART;VALUE=DATE:${cleanStartDate}`,
+                `DTEND;VALUE=DATE:${cleanEndDate}`,
+                `SUMMARY:🏃‍♂️ Race: ${race.name}`,
+                `LOCATION:${race.location}`,
+                `DESCRIPTION:Website Link: ${race.raceLink || 'None'}\\n\\nApps Close: ${formatDateFriendly(race.appCloseDate) || 'N/A'}\\n\\nGroup Members Attending: ${race.participants.join(', ')}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ];
+
+            const icsContent = icsLines.join('\r\n');
+            
+            // Generate file blob and trigger automated download layer
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${race.name.replace(/\s+/g, '_')}_Event.ics`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function renderListView() {
             listViewContainer.innerHTML = '';
-
             if (races.length === 0) {
                 listViewContainer.innerHTML = '<p style="text-align: center; color: var(--text-light);">No races posted yet. Be the first!</p>';
                 return;
@@ -466,9 +543,11 @@
             races.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             races.forEach(race => {
-                const dateObj = new Date(race.date);
-                const formattedDate = dateObj.toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
+                const formattedDate = new Date(race.date).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
                 const participantsHTML = race.participants.map(p => `<span class="participant-badge">👟 ${p}</span>`).join('');
+                
+                const closeHtml = race.appCloseDate ? `<div class="race-details">⏳ <strong>Deadlines:</strong> Apps close ${formatDateFriendly(race.appCloseDate)}</div>` : '';
+                const linkHtml = race.raceLink ? `<div class="race-details">🔗 <strong>Website:</strong> <a href="${race.raceLink}" target="_blank">Visit Race Page</a></div>` : '';
 
                 const card = document.createElement('div');
                 card.className = 'race-card';
@@ -477,10 +556,13 @@
                         <div>
                             <h3 class="race-title">${race.name}</h3>
                             <div class="race-details">📍 ${race.location} | Posted by: ${race.addedBy}</div>
+                            ${closeHtml}
+                            ${linkHtml}
                         </div>
                         <div class="race-date">
                             ${formattedDate}
                             <div class="action-links">
+                                <span class="export-action" onclick="exportToPhoneCalendar(${race.id})">📅 Export to Phone</span><br>
                                 <span class="edit-action" onclick="startEditing(${race.id})">Edit</span> | 
                                 <span class="delete-action" onclick="deleteRace(${race.id})">Remove</span>
                             </div>
@@ -499,7 +581,6 @@
             });
         }
 
-        // --- RENDER CALENDAR VIEW ---
         function renderCalendar() {
             calendarGrid.innerHTML = '';
             const year = currentCalendarDate.getFullYear();
@@ -540,7 +621,6 @@
                     const badge = document.createElement('div');
                     badge.className = 'calendar-race-badge';
                     badge.innerText = `🏃‍♂️ ${race.name}`;
-                    badge.title = `Click to view details for ${race.name}`;
                     badge.onclick = () => alertRaceDetails(race);
                     dayCell.appendChild(badge);
                 });
@@ -555,10 +635,9 @@
         }
 
         function alertRaceDetails(race) {
-            alert(`🏁 Race: ${race.name}\n📍 Location: ${race.location}\n📅 Date: ${race.date}\n\n👟 Runners Registered (${race.participants.length}):\n${race.participants.join(', ')}`);
+            alert(`🏁 Race: ${race.name}\n📍 Location: ${race.location}\n📅 Date: ${formatDateFriendly(race.date)}\n⏳ Apps Close: ${formatDateFriendly(race.appCloseDate) || 'N/A'}\n🔗 Website: ${race.raceLink || 'N/A'}\n\n👟 Registered (${race.participants.length}):\n${race.participants.join(', ')}`);
         }
 
-        // --- EDITING LOGIC ---
         function startEditing(raceId) {
             const race = races.find(r => r.id === raceId);
             if (!race) return;
@@ -569,51 +648,48 @@
             document.getElementById('raceDate').value = race.date;
             document.getElementById('raceLocation').value = race.location;
             document.getElementById('addedBy').value = race.addedBy;
+            document.getElementById('appCloseDate').value = race.appCloseDate || '';
+            document.getElementById('raceLink').value = race.raceLink || '';
 
             formTitle.innerText = "Edit Race Details";
             submitBtn.innerText = "Save Changes";
             cancelEditBtn.classList.remove('hidden');
             formCard.classList.add('editing-mode');
-
             formCard.scrollIntoView({ behavior: 'smooth' });
         }
 
         function cancelEditing() {
             editingRaceId = null;
             raceForm.reset();
-
             formTitle.innerText = "Post a New Race";
             submitBtn.innerText = "Add Race to Calendar";
             cancelEditBtn.classList.add('hidden');
             formCard.classList.remove('editing-mode');
         }
 
-        // --- DATA MANAGEMENT ACTIONS ---
         raceForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const raceName = document.getElementById('raceName').value;
-            const raceDate = document.getElementById('raceDate').value;
-            const raceLocation = document.getElementById('raceLocation').value;
-            const addedBy = document.getElementById('addedBy').value;
+            const raceData = {
+                name: document.getElementById('raceName').value,
+                date: document.getElementById('raceDate').value,
+                location: document.getElementById('raceLocation').value,
+                addedBy: document.getElementById('addedBy').value,
+                appCloseDate: document.getElementById('appCloseDate').value,
+                raceLink: document.getElementById('raceLink').value
+            };
 
             if (editingRaceId !== null) {
                 const raceIndex = races.findIndex(r => r.id === editingRaceId);
                 if (raceIndex !== -1) {
-                    races[raceIndex].name = raceName;
-                    races[raceIndex].date = raceDate;
-                    races[raceIndex].location = raceLocation;
-                    races[raceIndex].addedBy = addedBy;
+                    Object.assign(races[raceIndex], raceData);
                 }
                 editingRaceId = null;
             } else {
                 const newRace = {
                     id: Date.now(),
-                    name: raceName,
-                    date: raceDate,
-                    location: raceLocation,
-                    addedBy: addedBy,
-                    participants: [addedBy]
+                    ...raceData,
+                    participants: [raceData.addedBy]
                 };
                 races.push(newRace);
             }
@@ -637,10 +713,7 @@
         }
 
         function deleteRace(raceId) {
-            if (editingRaceId === raceId) {
-                cancelEditing();
-            }
-            
+            if (editingRaceId === raceId) cancelEditing();
             if(confirm("Are you sure you want to remove this race?")) {
                 races = races.filter(r => r.id !== raceId);
                 saveAndRender();
@@ -653,7 +726,6 @@
             renderCalendar();
         }
 
-        // Initial Boot
         initTheme();
         renderListView();
     </script>
