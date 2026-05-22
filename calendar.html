@@ -440,11 +440,33 @@
         </div>
     </div>
 
-    <script>
-        let races = JSON.parse(localStorage.getItem('runnerRaces')) || [];
+    <script type="module">
+        // 1. Import required Firebase SDK modules from web CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // 2. PASTE YOUR CONFIGURATION OBJECT COPIED FROM FIREBASE CONSOLE HERE:
+       const firebaseConfig = {
+            apiKey: "AIzaSyAkXBTzo0qvQd8clUB-5WKzLjcVpN5x30c",
+            authDomain: "team-marsden-race-calendar.firebaseapp.com",
+            projectId: "team-marsden-race-calendar",
+            storageBucket: "team-marsden-race-calendar.firebasestorage.app",
+            messagingSenderId: "550778038286",
+            appId: "1:550778038286:web:63961c5cd198d22ba3f45f",
+            measurementId: "G-LGG1RM0LEK"
+        };
+
+        // 3. Initialize Firebase Application Framework
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const racesRef = collection(db, "races");
+
+        // Application Internal State
+        let races = [];
         let currentCalendarDate = new Date(); 
         let editingRaceId = null;
 
+        // DOM elements
         const raceForm = document.getElementById('raceForm');
         const formCard = document.getElementById('formCard');
         const formTitle = document.getElementById('formTitle');
@@ -490,20 +512,15 @@
             return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
-        // --- NEW FEATURE: NATIVE PHONE CALENDAR EXPORTER (.ics) ---
         function exportToPhoneCalendar(raceId) {
             const race = races.find(r => r.id === raceId);
             if (!race) return;
 
-            // Format race date from YYYY-MM-DD to YYYYMMDD
             const cleanStartDate = race.date.replace(/-/g, '');
-            
-            // Calculate end date (next day) for an all-day event structure
             const endDateObj = new Date(race.date);
             endDateObj.setDate(endDateObj.getDate() + 1);
             const cleanEndDate = endDateObj.toISOString().slice(0,10).replace(/-/g, '');
 
-            // Construct iCalendar text format block
             const icsLines = [
                 'BEGIN:VCALENDAR',
                 'VERSION:2.0',
@@ -521,8 +538,6 @@
             ];
 
             const icsContent = icsLines.join('\r\n');
-            
-            // Generate file blob and trigger automated download layer
             const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -562,16 +577,16 @@
                         <div class="race-date">
                             ${formattedDate}
                             <div class="action-links">
-                                <span class="export-action" onclick="exportToPhoneCalendar(${race.id})">📅 Export to Phone</span><br>
-                                <span class="edit-action" onclick="startEditing(${race.id})">Edit</span> | 
-                                <span class="delete-action" onclick="deleteRace(${race.id})">Remove</span>
+                                <span class="export-action" onclick="exportToPhoneCalendar('${race.id}')">📅 Export to Phone</span><br>
+                                <span class="edit-action" onclick="startEditing('${race.id}')">Edit</span> | 
+                                <span class="delete-action" onclick="deleteRace('${race.id}')">Remove</span>
                             </div>
                         </div>
                     </div>
                     <div class="participants-section">
                         <strong>Who's Running? (${race.participants.length})</strong>
                         <ul class="participants-list">${participantsHTML || '<span style="color: var(--text-light); font-size: 0.9rem;">No one has joined yet.</span>'}</ul>
-                        <form class="join-form" onsubmit="joinRace(event, ${race.id})">
+                        <form class="join-form" onsubmit="joinRace(event, '${race.id}')">
                             <input type="text" placeholder="Enter your name to join" required id="joinName-${race.id}">
                             <button type="submit">Join</button>
                         </form>
@@ -667,7 +682,8 @@
             formCard.classList.remove('editing-mode');
         }
 
-        raceForm.addEventListener('submit', function(e) {
+        // --- CONNECT FORM HANDLING TO FIREBASE ---
+        raceForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const raceData = {
@@ -679,55 +695,85 @@
                 raceLink: document.getElementById('raceLink').value
             };
 
-            if (editingRaceId !== null) {
-                const raceIndex = races.findIndex(r => r.id === editingRaceId);
-                if (raceIndex !== -1) {
-                    Object.assign(races[raceIndex], raceData);
+            try {
+                if (editingRaceId !== null) {
+                    // Update existing record in Firestore
+                    const raceDocRef = doc(db, "races", editingRaceId);
+                    await updateDoc(raceDocRef, raceData);
+                    editingRaceId = null;
+                } else {
+                    // Add new document record to Firestore collection
+                    raceData.participants = [raceData.addedBy];
+                    await addDoc(racesRef, raceData);
                 }
-                editingRaceId = null;
-            } else {
-                const newRace = {
-                    id: Date.now(),
-                    ...raceData,
-                    participants: [raceData.addedBy]
-                };
-                races.push(newRace);
+                cancelEditing();
+            } catch (error) {
+                console.error("Error committing write to Firestore: ", error);
+                alert("Could not save race data to database.");
             }
-
-            saveAndRender();
-            cancelEditing();
         });
 
-        function joinRace(e, raceId) {
+        // --- CONNECT REGISTRATION AND DELETIONS TO FIREBASE ---
+        async function joinRace(e, raceId) {
             e.preventDefault();
             const inputEl = document.getElementById(`joinName-${raceId}`);
             const runnerName = inputEl.value.trim();
+            if (!runnerName) return;
 
             const race = races.find(r => r.id === raceId);
-            if (race && !race.participants.includes(runnerName)) {
-                race.participants.push(runnerName);
-                saveAndRender();
-            } else {
+            if (race && race.participants.includes(runnerName)) {
                 alert("You're already registered for this race!");
+                return;
+            }
+
+            try {
+                const raceDocRef = doc(db, "races", raceId);
+                await updateDoc(raceDocRef, {
+                    participants: arrayUnion(runnerName)
+                });
+            } catch (error) {
+                console.error("Error joining race profile: ", error);
             }
         }
 
-        function deleteRace(raceId) {
+        async function deleteRace(raceId) {
             if (editingRaceId === raceId) cancelEditing();
-            if(confirm("Are you sure you want to remove this race?")) {
-                races = races.filter(r => r.id !== raceId);
-                saveAndRender();
+            if (confirm("Are you sure you want to remove this race?")) {
+                try {
+                    await deleteDoc(doc(db, "races", raceId));
+                } catch (error) {
+                    console.error("Error removing data: ", error);
+                }
             }
         }
 
-        function saveAndRender() {
-            localStorage.setItem('runnerRaces', JSON.stringify(races));
+        // --- REAL-TIME LIVE SNAPSHOT STREAM FROM FIREBASE ---
+        // Automatically re-syncs layout arrays whenever anyone anywhere alters data
+        onSnapshot(racesRef, (snapshot) => {
+            races = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
             renderListView();
-            renderCalendar();
-        }
+            if (!calendarViewContainer.classList.contains('hidden')) {
+                renderCalendar();
+            }
+        });
 
+        // --- EXPOSE INTERNAL CONTROLLER FUNCTIONS TO NATIVE WINDOW LAYERS ---
+        // Required for HTML elements running module-scoped event calls
+        window.switchView = switchView;
+        window.toggleTheme = toggleTheme;
+        window.changeMonth = changeMonth;
+        window.exportToPhoneCalendar = exportToPhoneCalendar;
+        window.startEditing = startEditing;
+        window.deleteRace = deleteRace;
+        window.joinRace = joinRace;
+        window.cancelEditing = cancelEditing;
+
+        // Startup Boot
         initTheme();
-        renderListView();
     </script>
 </body>
 </html>
