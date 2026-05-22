@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Runners Connect - Race Calendar</title>
+    <title>Green 12 2026 - Race Calendar</title>
     <style>
         /* =========================================================
            COLOR CONFIGURATION
            ========================================================= */
         :root {
-            --primary: #FF5A5F;        
-            --primary-hover: #E0484D;  
+            --primary: #a4fc3e;        
+            --primary-hover: #73b22b;  
             --background: #F7F9FC;     
             --card-bg: #FFFFFF;        
             --text-main: #333333;      
@@ -252,17 +252,17 @@
             text-decoration: underline;
         }
 
-        .edit-action { color: #0066cc; }
-        body.dark-mode .edit-action { color: #4da6ff; }
+        .edit-action { color: ##a4fc3e; }
+        body.dark-mode .edit-action { color: #a4fc3e; }
 
-        .delete-action { color: #cc0000; }
-        body.dark-mode .delete-action { color: #ff4d4d; }
+        .delete-action { color: #a4fc3e; }
+        body.dark-mode .delete-action { color: ##a4fc3e; }
 
         .export-action {
-            color: #2e7d32;
+            color: #95c11f;
             font-weight: 600;
         }
-        body.dark-mode .export-action { color: #81c784; }
+        body.dark-mode .export-action { color: #95c11f; }
 
         .participants-section {
             background-color: var(--background);
@@ -380,7 +380,7 @@
 <body>
 
     <div class="container">
-        <h1>🏃‍♂️ Runners Connect</h1>
+        <h1>Team Marsden 2026 Race Calendar</h1>
 
         <div class="controls-row">
             <div class="view-switcher">
@@ -446,15 +446,15 @@
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         // 2. PASTE YOUR CONFIGURATION OBJECT COPIED FROM FIREBASE CONSOLE HERE:
-       const firebaseConfig = {
-            apiKey: "AIzaSyAkXBTzo0qvQd8clUB-5WKzLjcVpN5x30c",
-            authDomain: "team-marsden-race-calendar.firebaseapp.com",
-            projectId: "team-marsden-race-calendar",
-            storageBucket: "team-marsden-race-calendar.firebasestorage.app",
-            messagingSenderId: "550778038286",
-            appId: "1:550778038286:web:63961c5cd198d22ba3f45f",
-            measurementId: "G-LGG1RM0LEK"
-        };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDE23QUS2MEqVgP655tZ1vfe8y_swN7Ulg",
+            authDomain: "green-12-calendar.firebaseapp.com",
+            projectId: "green-12-calendar",
+            storageBucket: "green-12-calendar.firebasestorage.app",
+            messagingSenderId: "774812656182",
+            appId: "1:774812656182:web:86e7310cc4802d124e6e97",
+            measurementId: "G-K9T7F9X38Q"
+          };
 
         // 3. Initialize Firebase Application Framework
         const app = initializeApp(firebaseConfig);
